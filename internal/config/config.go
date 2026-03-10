@@ -8,12 +8,14 @@ import (
 
 // Config holds all application configuration.
 type Config struct {
-	Server      ServerConfig
-	LLMProvider string // "claude", "gemini", or "mock"
-	Claude      ClaudeConfig
-	Gemini      GeminiConfig
-	Timeouts    TimeoutConfig
-	LogLevel    string
+	Server             ServerConfig
+	LLMProvider        string // "claude", "gemini", or "mock"
+	FilesystemProvider string // "pinata" or "mock"
+	Claude             ClaudeConfig
+	Gemini             GeminiConfig
+	Pinata             PinataConfig
+	Timeouts           TimeoutConfig
+	LogLevel           string
 }
 
 // ServerConfig holds HTTP server configuration.
@@ -32,6 +34,14 @@ type ClaudeConfig struct {
 type GeminiConfig struct {
 	APIKey string
 	Model  string
+}
+
+// PinataConfig holds Pinata IPFS configuration.
+type PinataConfig struct {
+	GatewayURL string // Custom gateway URL (leave empty for public gateway)
+	GatewayKey string // Optional: Gateway key for dedicated gateways
+	JWT        string // Optional: Pinata JWT for private file access
+	IsPrivate  bool   // Whether files are private (requires JWT)
 }
 
 // TimeoutConfig holds various timeout configurations.
@@ -56,7 +66,8 @@ func Load() *Config {
 			Host: getEnv("HOST", "localhost"),
 			Port: getEnv("PORT", "8080"),
 		},
-		LLMProvider: getEnv("LLM_PROVIDER", "auto"), // "claude", "gemini", "mock", or "auto"
+		LLMProvider:        getEnv("LLM_PROVIDER", "auto"),        // "claude", "gemini", "mock", or "auto"
+		FilesystemProvider: getEnv("FILESYSTEM_PROVIDER", "auto"), // "pinata", "mock", or "auto"
 		Claude: ClaudeConfig{
 			APIKey: getEnv("ANTHROPIC_API_KEY", ""),
 			Model:  getEnv("CLAUDE_MODEL", "claude-sonnet-4-20250514"),
@@ -64,6 +75,12 @@ func Load() *Config {
 		Gemini: GeminiConfig{
 			APIKey: getEnv("GEMINI_API_KEY", ""),
 			Model:  getEnv("GEMINI_MODEL", "gemini-2.0-flash"),
+		},
+		Pinata: PinataConfig{
+			GatewayURL: getEnv("PINATA_GATEWAY_URL", ""),
+			GatewayKey: getEnv("PINATA_GATEWAY_KEY", ""),
+			JWT:        getEnv("PINATA_JWT", ""),
+			IsPrivate:  getEnv("PINATA_PRIVATE", "false") == "true",
 		},
 		Timeouts: TimeoutConfig{
 			HTTPClient:  getDurationEnv("HTTP_CLIENT_TIMEOUT", 30),
