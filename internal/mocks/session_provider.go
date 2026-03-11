@@ -32,7 +32,7 @@ func NewMockSessionProvider() *MockSessionProvider {
 			"preferences.food.read",
 			"health.read",
 		},
-		ExpiresAt:     1773165600, // Far future timestamp
+		ExpiresAt:     1900000000, // Far future timestamp (year 2030)
 		RemainingUses: 5,
 		Revoked:       false,
 	}

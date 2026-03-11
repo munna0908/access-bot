@@ -100,8 +100,13 @@ func (p *PinataClient) FetchByCID(ctx context.Context, cid string) (*models.File
 
 // createAccessLink creates a temporary signed URL for private file access.
 func (p *PinataClient) createAccessLink(ctx context.Context, cid string) (string, error) {
-	// Construct the gateway URL for the file
-	gatewayFileURL := fmt.Sprintf("%s/%s", p.gatewayURL, cid)
+	// For private files, use /files/ path instead of /ipfs/
+	// Extract base gateway URL (remove /ipfs suffix if present)
+	baseGateway := p.gatewayURL
+	if len(baseGateway) > 5 && baseGateway[len(baseGateway)-5:] == "/ipfs" {
+		baseGateway = baseGateway[:len(baseGateway)-5]
+	}
+	gatewayFileURL := fmt.Sprintf("%s/files/%s", baseGateway, cid)
 
 	reqBody := accessLinkRequest{
 		URL:     gatewayFileURL,
@@ -115,7 +120,7 @@ func (p *PinataClient) createAccessLink(ctx context.Context, cid string) (string
 		return "", fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	apiURL := fmt.Sprintf("%s/v3/files/private/download_link", pinataAPIURL)
+	apiURL := fmt.Sprintf("%s/v3/files/sign", pinataAPIURL)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, apiURL, bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return "", fmt.Errorf("failed to create request: %w", err)
