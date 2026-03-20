@@ -19,6 +19,7 @@ import (
 	"github.com/access-bot/internal/services/accesslayer"
 	"github.com/access-bot/internal/services/filesystem"
 	"github.com/access-bot/internal/services/llm"
+	"github.com/access-bot/internal/services/session"
 )
 
 func main() {
@@ -37,7 +38,7 @@ func main() {
 	printBanner()
 
 	// Create providers
-	sessionProvider := mocks.NewMockSessionProvider()
+	sessionProvider := createSessionProvider(ctx, cfg, logger)
 	categoryIndexProvider := mocks.NewMockCategoryIndexProvider()
 	filesystemProvider := createFilesystemProvider(ctx, cfg, logger)
 	llmProvider := createLLMProvider(ctx, cfg, logger)
@@ -125,6 +126,31 @@ func createLLMProvider(ctx context.Context, cfg *config.Config, logger *logging.
 	default:
 		logger.Info(ctx, "using_llm_provider", "provider", "mock")
 		return mocks.NewMockLLMProvider()
+	}
+}
+
+func createSessionProvider(ctx context.Context, cfg *config.Config, logger *logging.Logger) providers.SessionProvider {
+	provider := cfg.SessionProvider
+
+	// Auto-detect provider based on available configuration
+	if provider == "auto" {
+		if cfg.Intelligence.BaseURL != "" {
+			provider = "intelligence"
+		} else {
+			provider = "mock"
+		}
+	}
+
+	switch provider {
+	case "intelligence":
+		logger.Info(ctx, "using_session_provider", "provider", "intelligence", "url", cfg.Intelligence.BaseURL)
+		return session.NewIntelligenceClient(session.IntelligenceConfig{
+			BaseURL: cfg.Intelligence.BaseURL,
+			Timeout: cfg.Timeouts.HTTPClient,
+		})
+	default:
+		logger.Info(ctx, "using_session_provider", "provider", "mock")
+		return mocks.NewMockSessionProvider()
 	}
 }
 

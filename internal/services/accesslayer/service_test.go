@@ -93,8 +93,8 @@ func TestProcessAnswerRequest_SessionNotFound(t *testing.T) {
 
 	resp := service.ProcessAnswerRequest(context.Background(), req)
 
-	if resp.Status != string(domain.StatusCannotAnswer) {
-		t.Errorf("expected status %s, got %s", domain.StatusCannotAnswer, resp.Status)
+	if resp.Status != string(domain.StatusPermissionDen) {
+		t.Errorf("expected status %s, got %s", domain.StatusPermissionDen, resp.Status)
 	}
 	if resp.Reason == nil || *resp.Reason != string(domain.ReasonSessionNotFound) {
 		t.Errorf("expected reason %s, got %v", domain.ReasonSessionNotFound, resp.Reason)
@@ -334,47 +334,3 @@ func TestProcessAnswerRequest_EmptyLLMResponse(t *testing.T) {
 	}
 }
 
-func TestCheckScopeCoverage(t *testing.T) {
-	service, _, _, _, _ := setupTestService()
-
-	tests := []struct {
-		name           string
-		categories     []string
-		approvedScopes []string
-		wantMissing    int
-	}{
-		{
-			name:           "all scopes present",
-			categories:     []string{"FOOD", "HEALTH"},
-			approvedScopes: []string{"preferences.food.read", "health.read"},
-			wantMissing:    0,
-		},
-		{
-			name:           "missing one scope",
-			categories:     []string{"FOOD", "ADDRESS"},
-			approvedScopes: []string{"preferences.food.read"},
-			wantMissing:    1,
-		},
-		{
-			name:           "all scopes missing",
-			categories:     []string{"FOOD", "HEALTH"},
-			approvedScopes: []string{},
-			wantMissing:    2,
-		},
-		{
-			name:           "extra scopes present",
-			categories:     []string{"FOOD"},
-			approvedScopes: []string{"preferences.food.read", "health.read", "profile.address.read"},
-			wantMissing:    0,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			missing := service.checkScopeCoverage(tt.categories, tt.approvedScopes)
-			if len(missing) != tt.wantMissing {
-				t.Errorf("expected %d missing scopes, got %d: %v", tt.wantMissing, len(missing), missing)
-			}
-		})
-	}
-}

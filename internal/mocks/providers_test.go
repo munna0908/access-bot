@@ -4,52 +4,116 @@ import (
 	"context"
 	"errors"
 	"testing"
+
+	"github.com/access-bot/internal/models"
 )
 
-func TestMockSessionProvider(t *testing.T) {
+func TestMockSessionProvider_ValidateSession(t *testing.T) {
 	provider := NewMockSessionProvider()
 	ctx := context.Background()
 
-	// Test getting existing session
-	session, err := provider.GetSession(ctx, "sess_123")
+	// Test validating existing session with correct params
+	req := &models.ValidateSessionRequest{
+		ParticipantID:  "user_001",
+		AgentID:        "openclaw_whatsapp_bot",
+		SessionID:      "sess_123",
+		RequiredScopes: []string{"preferences.food.read"},
+		CurrentTime:    1700000000, // Before expiry (1900000000)
+	}
+	err := provider.ValidateSession(ctx, req)
 	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if session == nil {
-		t.Fatal("expected session, got nil")
-	}
-	if session.SessionID != "sess_123" {
-		t.Errorf("expected session_id 'sess_123', got %q", session.SessionID)
-	}
-	if session.ParticipantID != "user_001" {
-		t.Errorf("expected participant_id 'user_001', got %q", session.ParticipantID)
+		t.Fatalf("expected valid session, got error: %v", err)
 	}
 
-	// Test getting non-existent session
-	session, err = provider.GetSession(ctx, "nonexistent")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+	// Test non-existent session
+	req = &models.ValidateSessionRequest{
+		ParticipantID:  "user_001",
+		AgentID:        "openclaw_whatsapp_bot",
+		SessionID:      "nonexistent",
+		RequiredScopes: []string{},
+		CurrentTime:    1700000000,
 	}
-	if session != nil {
-		t.Error("expected nil session for nonexistent ID")
+	err = provider.ValidateSession(ctx, req)
+	if !errors.Is(err, ErrSessionNotFound) {
+		t.Errorf("expected ErrSessionNotFound, got %v", err)
 	}
 
 	// Test expired session
-	session, err = provider.GetSession(ctx, "sess_expired")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+	req = &models.ValidateSessionRequest{
+		ParticipantID:  "user_001",
+		AgentID:        "openclaw_whatsapp_bot",
+		SessionID:      "sess_expired",
+		RequiredScopes: []string{},
+		CurrentTime:    1700000000,
 	}
-	if session == nil {
-		t.Fatal("expected expired session, got nil")
+	err = provider.ValidateSession(ctx, req)
+	if !errors.Is(err, ErrSessionExpired) {
+		t.Errorf("expected ErrSessionExpired, got %v", err)
 	}
 
 	// Test revoked session
-	session, err = provider.GetSession(ctx, "sess_revoked")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+	req = &models.ValidateSessionRequest{
+		ParticipantID:  "user_001",
+		AgentID:        "openclaw_whatsapp_bot",
+		SessionID:      "sess_revoked",
+		RequiredScopes: []string{},
+		CurrentTime:    1700000000,
 	}
-	if session == nil || !session.Revoked {
-		t.Error("expected revoked session")
+	err = provider.ValidateSession(ctx, req)
+	if !errors.Is(err, ErrSessionRevoked) {
+		t.Errorf("expected ErrSessionRevoked, got %v", err)
+	}
+
+	// Test exhausted session
+	req = &models.ValidateSessionRequest{
+		ParticipantID:  "user_001",
+		AgentID:        "openclaw_whatsapp_bot",
+		SessionID:      "sess_exhausted",
+		RequiredScopes: []string{},
+		CurrentTime:    1700000000,
+	}
+	err = provider.ValidateSession(ctx, req)
+	if !errors.Is(err, ErrSessionExhausted) {
+		t.Errorf("expected ErrSessionExhausted, got %v", err)
+	}
+
+	// Test participant mismatch
+	req = &models.ValidateSessionRequest{
+		ParticipantID:  "wrong_user",
+		AgentID:        "openclaw_whatsapp_bot",
+		SessionID:      "sess_123",
+		RequiredScopes: []string{},
+		CurrentTime:    1700000000,
+	}
+	err = provider.ValidateSession(ctx, req)
+	if !errors.Is(err, ErrSessionParticipantMismatch) {
+		t.Errorf("expected ErrSessionParticipantMismatch, got %v", err)
+	}
+
+	// Test agent mismatch
+	req = &models.ValidateSessionRequest{
+		ParticipantID:  "user_001",
+		AgentID:        "wrong_agent",
+		SessionID:      "sess_123",
+		RequiredScopes: []string{},
+		CurrentTime:    1700000000,
+	}
+	err = provider.ValidateSession(ctx, req)
+	if !errors.Is(err, ErrSessionAgentMismatch) {
+		t.Errorf("expected ErrSessionAgentMismatch, got %v", err)
+	}
+
+	// Test missing scope
+	req = &models.ValidateSessionRequest{
+		ParticipantID:  "user_001",
+		AgentID:        "openclaw_whatsapp_bot",
+		SessionID:      "sess_123",
+		RequiredScopes: []string{"profile.address.read"}, // Not in sess_123
+		CurrentTime:    1700000000,
+	}
+	err = provider.ValidateSession(ctx, req)
+	if !errors.Is(err, ErrSessionMissingScope) {
+		t.Errorf("expected ErrSessionMissingScope, got %v", err)
 	}
 }
 
@@ -160,19 +224,7 @@ func TestMockLLMProvider(t *testing.T) {
 }
 
 func TestMockProviderMutations(t *testing.T) {
-	// Test session provider mutations
-	sessionProvider := NewMockSessionProvider()
 	ctx := context.Background()
-
-	session, _ := sessionProvider.GetSession(ctx, "sess_123")
-	// Mutate the returned session
-	session.Revoked = true
-
-	// Original should be unchanged
-	original, _ := sessionProvider.GetSession(ctx, "sess_123")
-	if original.Revoked {
-		t.Error("mutation affected original session")
-	}
 
 	// Test category index provider mutations
 	categoryProvider := NewMockCategoryIndexProvider()

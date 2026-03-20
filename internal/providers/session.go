@@ -6,9 +6,9 @@ import (
 	"github.com/access-bot/internal/models"
 )
 
-// SessionProvider defines the interface for session retrieval.
+// SessionProvider defines the interface for session validation.
 type SessionProvider interface {
-	// GetSession retrieves a session by its ID.
-	// Returns nil if the session is not found.
-	GetSession(ctx context.Context, sessionID string) (*models.Session, error)
+	// ValidateSession validates a session against the participant intelligence service.
+	// Returns nil if valid, or an error with the failure reason.
+	ValidateSession(ctx context.Context, req *models.ValidateSessionRequest) error
 }

@@ -55,34 +55,29 @@ func (s *Service) ProcessAnswerRequest(ctx context.Context, req *models.AnswerRe
 		return s.failureResponse(ctx, reqLogger, req.RequestID, string(domain.StatusInvalidRequest), string(domain.ReasonValidationFailed))
 	}
 
-	// Step 2: Load session
-	session, err := s.sessionProvider.GetSession(ctx, req.SessionID)
-	if err != nil {
-		reqLogger.Error(ctx, "session_load_failed", "error", err.Error())
-		return s.failureResponse(ctx, reqLogger, req.RequestID, string(domain.StatusCannotAnswer), string(domain.ReasonSessionNotFound))
-	}
-	if session == nil {
-		reqLogger.Error(ctx, "session_not_found")
-		return s.failureResponse(ctx, reqLogger, req.RequestID, string(domain.StatusCannotAnswer), string(domain.ReasonSessionNotFound))
-	}
-
-	// Step 3: Validate session
-	if reason := s.validateSession(ctx, reqLogger, session, req); reason != "" {
-		return s.failureResponse(ctx, reqLogger, req.RequestID, string(domain.StatusPermissionDen), reason)
-	}
-
-	// Step 4: Validate requested categories
+	// Step 2: Validate requested categories
 	validCategories, err := validation.ValidateCategories(req.RequiredCategories)
 	if err != nil {
 		reqLogger.Error(ctx, "invalid_categories", "error", err.Error())
 		return s.failureResponse(ctx, reqLogger, req.RequestID, string(domain.StatusInvalidRequest), string(domain.ReasonInvalidCategory))
 	}
 
-	// Step 5 & 6: Map categories to required scopes and check scope coverage
-	missingScopes := s.checkScopeCoverage(validCategories, session.ApprovedScopes)
-	if len(missingScopes) > 0 {
-		reqLogger.Error(ctx, "insufficient_scopes", "missing_scopes", missingScopes)
-		return s.failureResponse(ctx, reqLogger, req.RequestID, string(domain.StatusPermissionDen), string(domain.ReasonInsufficientAuthorizedScope))
+	// Step 3: Map categories to required scopes
+	requiredScopes := s.getRequiredScopes(validCategories)
+
+	// Step 4: Validate session via participant-intelligence-service
+	validateReq := &models.ValidateSessionRequest{
+		ParticipantID:      req.ParticipantID,
+		AgentID:            req.AgentID,
+		SessionID:          req.SessionID,
+		RequiredCategories: validCategories,
+		RequiredScopes:     requiredScopes,
+		CurrentTime:        time.Now().Unix(),
+	}
+	if err := s.sessionProvider.ValidateSession(ctx, validateReq); err != nil {
+		reason := s.mapValidationError(err)
+		reqLogger.Error(ctx, "session_validation_failed", "error", err.Error())
+		return s.failureResponse(ctx, reqLogger, req.RequestID, string(domain.StatusPermissionDen), reason)
 	}
 
 	// Step 7: Load category CID index
@@ -136,72 +131,38 @@ func (s *Service) ProcessAnswerRequest(ctx context.Context, req *models.AnswerRe
 	return response
 }
 
-// validateSession checks all session validation rules.
-func (s *Service) validateSession(ctx context.Context, reqLogger *logging.RequestLogger, session *models.Session, req *models.AnswerRequest) string {
-	// Check participant_id matches
-	if session.ParticipantID != req.ParticipantID {
-		reqLogger.Error(ctx, "session_participant_mismatch",
-			"session_participant", session.ParticipantID,
-			"request_participant", req.ParticipantID,
-		)
-		return string(domain.ReasonSessionParticipantMismatch)
+// getRequiredScopes maps categories to their required scopes.
+func (s *Service) getRequiredScopes(categories []string) []string {
+	var scopes []string
+	for _, category := range categories {
+		if scope, ok := config.GetRequiredScope(category); ok {
+			scopes = append(scopes, scope)
+		}
 	}
-
-	// Check agent_id matches
-	if session.AgentID != req.AgentID {
-		reqLogger.Error(ctx, "session_agent_mismatch",
-			"session_agent", session.AgentID,
-			"request_agent", req.AgentID,
-		)
-		return string(domain.ReasonSessionAgentMismatch)
-	}
-
-	// Check not expired
-	now := time.Now().Unix()
-	if session.ExpiresAt <= now {
-		reqLogger.Error(ctx, "session_expired",
-			"expires_at", session.ExpiresAt,
-			"current_time", now,
-		)
-		return string(domain.ReasonSessionExpired)
-	}
-
-	// Check not revoked
-	if session.Revoked {
-		reqLogger.Error(ctx, "session_revoked")
-		return string(domain.ReasonSessionRevoked)
-	}
-
-	// Check usage limit
-	if session.RemainingUses <= 0 {
-		reqLogger.Error(ctx, "usage_limit_exceeded",
-			"remaining_uses", session.RemainingUses,
-		)
-		return string(domain.ReasonUsageLimitExceeded)
-	}
-
-	return ""
+	return scopes
 }
 
-// checkScopeCoverage verifies all required scopes are present.
-func (s *Service) checkScopeCoverage(categories []string, approvedScopes []string) []string {
-	scopeSet := make(map[string]bool)
-	for _, scope := range approvedScopes {
-		scopeSet[scope] = true
+// mapValidationError converts validation errors to domain reasons.
+func (s *Service) mapValidationError(err error) string {
+	errMsg := err.Error()
+	switch errMsg {
+	case "not_found":
+		return string(domain.ReasonSessionNotFound)
+	case "expired":
+		return string(domain.ReasonSessionExpired)
+	case "revoked":
+		return string(domain.ReasonSessionRevoked)
+	case "exhausted":
+		return string(domain.ReasonUsageLimitExceeded)
+	case "agent_mismatch":
+		return string(domain.ReasonSessionAgentMismatch)
+	case "participant_mismatch":
+		return string(domain.ReasonSessionParticipantMismatch)
+	case "missing_scope":
+		return string(domain.ReasonInsufficientAuthorizedScope)
+	default:
+		return string(domain.ReasonSessionNotFound)
 	}
-
-	var missingScopes []string
-	for _, category := range categories {
-		requiredScope, ok := config.GetRequiredScope(category)
-		if !ok {
-			continue // Category validation already happened
-		}
-		if !scopeSet[requiredScope] {
-			missingScopes = append(missingScopes, requiredScope)
-		}
-	}
-
-	return missingScopes
 }
 
 // fetchCategoryContents retrieves markdown content for each category.

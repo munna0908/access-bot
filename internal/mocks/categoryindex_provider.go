@@ -23,14 +23,14 @@ func NewMockCategoryIndexProvider() *MockCategoryIndexProvider {
 		indexes: make(map[string]*models.CategoryIndex),
 	}
 
-	// Add sample participant category indexes with real Pinata CIDs
+	// Add sample participant category indexes
 	provider.indexes["user_001"] = &models.CategoryIndex{
 		ParticipantID: "user_001",
 		Categories: map[string]string{
-			"HEALTH":  "bafkreigrjgo5e5axdc4erwklj45dht3p5h3idj27hywg6xqh6tyjwtlrri",
-			"FOOD":    "bafkreicsuzcxsvav6zwf3ngertathw5at6jutifrqhyrjg5idv7lrnueee",
-			"ADDRESS": "bafkreicfj25vlrm5wviir55sapua5tlvwba4zokj6tzo7gaj66jruwxsyu",
-			"PAYMENT": "bafkreidylqyncucss7rqicfb4ndbyphisyedaoc6cxirp4yz4kqqtm5gy4",
+			"HEALTH":  "bafy_health_cid_001",
+			"FOOD":    "bafy_food_cid_001",
+			"ADDRESS": "bafy_address_cid_001",
+			"PAYMENT": "bafy_payment_cid_001",
 		},
 	}
 

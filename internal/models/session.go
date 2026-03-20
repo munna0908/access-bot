@@ -11,6 +11,16 @@ type Session struct {
 	Revoked        bool     `json:"revoked"`
 }
 
+// ValidateSessionRequest represents a request to validate a session.
+type ValidateSessionRequest struct {
+	ParticipantID      string   `json:"participantId"`
+	AgentID            string   `json:"agentId"`
+	SessionID          string   `json:"sessionId"`
+	RequiredCategories []string `json:"requiredCategories"`
+	RequiredScopes     []string `json:"requiredScopes"`
+	CurrentTime        int64    `json:"currentTime"`
+}
+
 // CategoryIndex represents the CID mapping for a participant's data categories.
 type CategoryIndex struct {
 	ParticipantID string            `json:"participant_id"`

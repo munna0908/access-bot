@@ -2,10 +2,22 @@ package mocks
 
 import (
 	"context"
+	"errors"
 	"sync"
 
 	"github.com/access-bot/internal/models"
 	"github.com/access-bot/internal/providers"
+)
+
+// Session validation error reasons (matching participant-intelligence-service).
+var (
+	ErrSessionNotFound            = errors.New("not_found")
+	ErrSessionExpired             = errors.New("expired")
+	ErrSessionRevoked             = errors.New("revoked")
+	ErrSessionExhausted           = errors.New("exhausted")
+	ErrSessionAgentMismatch       = errors.New("agent_mismatch")
+	ErrSessionParticipantMismatch = errors.New("participant_mismatch")
+	ErrSessionMissingScope        = errors.New("missing_scope")
 )
 
 // MockSessionProvider is an in-memory mock implementation of SessionProvider.
@@ -47,7 +59,7 @@ func NewMockSessionProvider() *MockSessionProvider {
 			"profile.address.read",
 			"finance.payment.read",
 		},
-		ExpiresAt:     1773165600,
+		ExpiresAt:     2000000000, // Far future timestamp (year 2033)
 		RemainingUses: 10,
 		Revoked:       false,
 	}
@@ -60,7 +72,7 @@ func NewMockSessionProvider() *MockSessionProvider {
 			"profile.address.read",
 			"finance.payment.read",
 		},
-		ExpiresAt:     1773165600,
+		ExpiresAt:     2000000000, // Far future timestamp (year 2033)
 		RemainingUses: 10,
 		Revoked:       false,
 	}
@@ -84,7 +96,7 @@ func NewMockSessionProvider() *MockSessionProvider {
 		ApprovedScopes: []string{
 			"preferences.food.read",
 		},
-		ExpiresAt:     1773165600,
+		ExpiresAt:     2000000000, // Far future timestamp (year 2033)
 		RemainingUses: 5,
 		Revoked:       true,
 	}
@@ -96,7 +108,7 @@ func NewMockSessionProvider() *MockSessionProvider {
 		ApprovedScopes: []string{
 			"preferences.food.read",
 		},
-		ExpiresAt:     1773165600,
+		ExpiresAt:     2000000000, // Far future timestamp (year 2033)
 		RemainingUses: 0,
 		Revoked:       false,
 	}
@@ -104,23 +116,53 @@ func NewMockSessionProvider() *MockSessionProvider {
 	return provider
 }
 
-// GetSession retrieves a session by its ID.
-func (m *MockSessionProvider) GetSession(ctx context.Context, sessionID string) (*models.Session, error) {
+// ValidateSession validates a session against the stored sessions.
+func (m *MockSessionProvider) ValidateSession(ctx context.Context, req *models.ValidateSessionRequest) error {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	session, ok := m.sessions[sessionID]
+	session, ok := m.sessions[req.SessionID]
 	if !ok {
-		return nil, nil
+		return ErrSessionNotFound
 	}
 
-	// Return a copy to prevent mutations
-	sessionCopy := *session
-	scopesCopy := make([]string, len(session.ApprovedScopes))
-	copy(scopesCopy, session.ApprovedScopes)
-	sessionCopy.ApprovedScopes = scopesCopy
+	// Check participant_id matches
+	if session.ParticipantID != req.ParticipantID {
+		return ErrSessionParticipantMismatch
+	}
 
-	return &sessionCopy, nil
+	// Check agent_id matches
+	if session.AgentID != req.AgentID {
+		return ErrSessionAgentMismatch
+	}
+
+	// Check not expired
+	if session.ExpiresAt <= req.CurrentTime {
+		return ErrSessionExpired
+	}
+
+	// Check not revoked
+	if session.Revoked {
+		return ErrSessionRevoked
+	}
+
+	// Check usage limit
+	if session.RemainingUses <= 0 {
+		return ErrSessionExhausted
+	}
+
+	// Check all required scopes are approved
+	scopeSet := make(map[string]bool)
+	for _, scope := range session.ApprovedScopes {
+		scopeSet[scope] = true
+	}
+	for _, requiredScope := range req.RequiredScopes {
+		if !scopeSet[requiredScope] {
+			return ErrSessionMissingScope
+		}
+	}
+
+	return nil
 }
 
 // AddSession adds a session to the mock store (for testing).

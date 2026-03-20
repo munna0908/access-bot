@@ -11,9 +11,11 @@ type Config struct {
 	Server             ServerConfig
 	LLMProvider        string // "claude", "gemini", or "mock"
 	FilesystemProvider string // "pinata" or "mock"
+	SessionProvider    string // "intelligence" or "mock"
 	Claude             ClaudeConfig
 	Gemini             GeminiConfig
 	Pinata             PinataConfig
+	Intelligence       IntelligenceConfig
 	Timeouts           TimeoutConfig
 	LogLevel           string
 }
@@ -44,6 +46,11 @@ type PinataConfig struct {
 	IsPrivate  bool   // Whether files are private (requires JWT)
 }
 
+// IntelligenceConfig holds participant intelligence service configuration.
+type IntelligenceConfig struct {
+	BaseURL string // Base URL of the intelligence service
+}
+
 // TimeoutConfig holds various timeout configurations.
 type TimeoutConfig struct {
 	HTTPClient  time.Duration
@@ -68,6 +75,7 @@ func Load() *Config {
 		},
 		LLMProvider:        getEnv("LLM_PROVIDER", "auto"),        // "claude", "gemini", "mock", or "auto"
 		FilesystemProvider: getEnv("FILESYSTEM_PROVIDER", "auto"), // "pinata", "mock", or "auto"
+		SessionProvider:    getEnv("SESSION_PROVIDER", "auto"),    // "intelligence", "mock", or "auto"
 		Claude: ClaudeConfig{
 			APIKey: getEnv("ANTHROPIC_API_KEY", ""),
 			Model:  getEnv("CLAUDE_MODEL", "claude-sonnet-4-20250514"),
@@ -81,6 +89,9 @@ func Load() *Config {
 			GatewayKey: getEnv("PINATA_GATEWAY_KEY", ""),
 			JWT:        getEnv("PINATA_JWT", ""),
 			IsPrivate:  getEnv("PINATA_PRIVATE", "false") == "true",
+		},
+		Intelligence: IntelligenceConfig{
+			BaseURL: getEnv("INTELLIGENCE_SERVICE_URL", ""),
 		},
 		Timeouts: TimeoutConfig{
 			HTTPClient:  getDurationEnv("HTTP_CLIENT_TIMEOUT", 30),

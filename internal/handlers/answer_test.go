@@ -167,10 +167,10 @@ func TestAnswerHandler_PermissionDenied(t *testing.T) {
 	}
 }
 
-func TestAnswerHandler_CannotAnswer(t *testing.T) {
+func TestAnswerHandler_SessionNotFound(t *testing.T) {
 	handler, _ := setupTestHandler()
 
-	// Session not found
+	// Session not found now returns permission_denied
 	reqBody := models.AnswerRequest{
 		RequestID:          "req_test_001",
 		ParticipantID:      "user_001",
@@ -189,9 +189,8 @@ func TestAnswerHandler_CannotAnswer(t *testing.T) {
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 
-	// cannot_answer still returns 200 OK
-	if rr.Code != http.StatusOK {
-		t.Errorf("expected status %d, got %d", http.StatusOK, rr.Code)
+	if rr.Code != http.StatusForbidden {
+		t.Errorf("expected status %d, got %d", http.StatusForbidden, rr.Code)
 	}
 
 	var resp models.AnswerResponse
@@ -199,8 +198,8 @@ func TestAnswerHandler_CannotAnswer(t *testing.T) {
 		t.Fatalf("failed to decode response: %v", err)
 	}
 
-	if resp.Status != "cannot_answer" {
-		t.Errorf("expected status 'cannot_answer', got %q", resp.Status)
+	if resp.Status != "permission_denied" {
+		t.Errorf("expected status 'permission_denied', got %q", resp.Status)
 	}
 }
 
