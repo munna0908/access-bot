@@ -9,6 +9,7 @@ import (
 // Config holds all application configuration.
 type Config struct {
 	Server             ServerConfig
+	DemoMode           bool   // When true, use demo providers that accept any participant/session
 	LLMProvider        string // "claude", "gemini", or "mock"
 	FilesystemProvider string // "pinata" or "mock"
 	SessionProvider    string // "intelligence" or "mock"
@@ -16,6 +17,7 @@ type Config struct {
 	Gemini             GeminiConfig
 	Pinata             PinataConfig
 	Intelligence       IntelligenceConfig
+	CategoryCIDs       CategoryCIDsConfig
 	Timeouts           TimeoutConfig
 	LogLevel           string
 }
@@ -51,6 +53,21 @@ type IntelligenceConfig struct {
 	BaseURL string // Base URL of the intelligence service
 }
 
+// CategoryCIDsConfig holds the Pinata CIDs for each data category.
+// Used in demo/non-chain mode so the bot can fetch real files without
+// requiring on-chain SetCategoryRef registration.
+type CategoryCIDsConfig struct {
+	Food    string
+	Health  string
+	Address string
+	Payment string
+}
+
+// IsConfigured returns true if at least one CID is set.
+func (c CategoryCIDsConfig) IsConfigured() bool {
+	return c.Food != "" || c.Health != "" || c.Address != "" || c.Payment != ""
+}
+
 // TimeoutConfig holds various timeout configurations.
 type TimeoutConfig struct {
 	HTTPClient  time.Duration
@@ -73,6 +90,7 @@ func Load() *Config {
 			Host: getEnv("HOST", "localhost"),
 			Port: getEnv("PORT", "8080"),
 		},
+		DemoMode:           getEnv("DEMO_MODE", "false") == "true",
 		LLMProvider:        getEnv("LLM_PROVIDER", "auto"),        // "claude", "gemini", "mock", or "auto"
 		FilesystemProvider: getEnv("FILESYSTEM_PROVIDER", "auto"), // "pinata", "mock", or "auto"
 		SessionProvider:    getEnv("SESSION_PROVIDER", "auto"),    // "intelligence", "mock", or "auto"
@@ -92,6 +110,12 @@ func Load() *Config {
 		},
 		Intelligence: IntelligenceConfig{
 			BaseURL: getEnv("INTELLIGENCE_SERVICE_URL", ""),
+		},
+		CategoryCIDs: CategoryCIDsConfig{
+			Food:    getEnv("CATEGORY_CID_FOOD", ""),
+			Health:  getEnv("CATEGORY_CID_HEALTH", ""),
+			Address: getEnv("CATEGORY_CID_ADDRESS", ""),
+			Payment: getEnv("CATEGORY_CID_PAYMENT", ""),
 		},
 		Timeouts: TimeoutConfig{
 			HTTPClient:  getDurationEnv("HTTP_CLIENT_TIMEOUT", 30),

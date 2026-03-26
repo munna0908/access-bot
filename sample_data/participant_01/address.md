@@ -13,7 +13,7 @@
 ## Delivery Instructions
 - Gate code: 1234
 - Security will call before allowing entry
-- Prefer delivery between 10 AM - 8 PM
+- Prefer delivery between 6 PM - 10 AM
 - Leave at door if not available (for trusted deliveries)
 
 ## Contact for Delivery

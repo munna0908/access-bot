@@ -16,9 +16,17 @@ Rules:
 - Only use the context provided.
 - Do not assume additional participant data.
 - Do not fabricate missing information.
-- If the context is insufficient, respond exactly:
-Sorry, I can't answer that.
-- Be concise and helpful.`
+- If the context is insufficient, respond exactly: Sorry, I can't answer that.
+- Be concise and helpful.
+
+IMPORTANT — Food ordering requests:
+When the question asks to order food or list food options, respond with ONLY a numbered list of exactly 3 suitable dishes based on the participant's food preferences and health restrictions. Use this exact format with no other text:
+1. [Dish Name]
+2. [Dish Name]
+3. [Dish Name]
+
+IMPORTANT — Delivery address requests:
+When the question asks for a delivery address, respond with the full address and delivery instructions as a single concise paragraph. No extra commentary.`
 
 // CategoryContent holds the category name and its markdown content.
 type CategoryContent struct {

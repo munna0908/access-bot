@@ -17,6 +17,7 @@ import (
 	"github.com/access-bot/internal/mocks"
 	"github.com/access-bot/internal/providers"
 	"github.com/access-bot/internal/services/accesslayer"
+	"github.com/access-bot/internal/services/categoryindex"
 	"github.com/access-bot/internal/services/filesystem"
 	"github.com/access-bot/internal/services/llm"
 	"github.com/access-bot/internal/services/session"
@@ -37,11 +38,24 @@ func main() {
 	// Print banner
 	printBanner()
 
-	// Create providers
-	sessionProvider := createSessionProvider(ctx, cfg, logger)
-	categoryIndexProvider := mocks.NewMockCategoryIndexProvider()
-	filesystemProvider := createFilesystemProvider(ctx, cfg, logger)
-	llmProvider := createLLMProvider(ctx, cfg, logger)
+	// Create providers — demo mode serves common sample data for any participant
+	var sessionProvider providers.SessionProvider
+	var categoryIndexProvider providers.CategoryIndexProvider
+	var filesystemProvider providers.FilesystemProvider
+	var llmProvider providers.LLMProvider
+
+	if cfg.DemoMode {
+		logger.Info(ctx, "demo_mode_enabled", "note", "accepting any session/participant")
+		sessionProvider = mocks.NewDemoSessionProvider()
+		categoryIndexProvider = createCategoryIndexProvider(ctx, cfg, logger)
+		filesystemProvider = createFilesystemProvider(ctx, cfg, logger)
+		llmProvider = createLLMProvider(ctx, cfg, logger)
+	} else {
+		sessionProvider = createSessionProvider(ctx, cfg, logger)
+		categoryIndexProvider = createCategoryIndexProvider(ctx, cfg, logger)
+		filesystemProvider = createFilesystemProvider(ctx, cfg, logger)
+		llmProvider = createLLMProvider(ctx, cfg, logger)
+	}
 
 	// Create service
 	service := accesslayer.NewService(
@@ -152,6 +166,34 @@ func createSessionProvider(ctx context.Context, cfg *config.Config, logger *logg
 		logger.Info(ctx, "using_session_provider", "provider", "mock")
 		return mocks.NewMockSessionProvider()
 	}
+}
+
+func createCategoryIndexProvider(ctx context.Context, cfg *config.Config, logger *logging.Logger) providers.CategoryIndexProvider {
+	// Prefer env-var CIDs — works without on-chain registration
+	if cfg.CategoryCIDs.IsConfigured() {
+		logger.Info(ctx, "using_category_index_provider", "provider", "env_cids",
+			"food", cfg.CategoryCIDs.Food != "",
+			"health", cfg.CategoryCIDs.Health != "",
+			"address", cfg.CategoryCIDs.Address != "",
+			"payment", cfg.CategoryCIDs.Payment != "",
+		)
+		return mocks.NewCIDCategoryIndexProvider(
+			cfg.CategoryCIDs.Food,
+			cfg.CategoryCIDs.Health,
+			cfg.CategoryCIDs.Address,
+			cfg.CategoryCIDs.Payment,
+		)
+	}
+	// Fall back to on-chain lookup via intelligence service
+	if cfg.Intelligence.BaseURL != "" {
+		logger.Info(ctx, "using_category_index_provider", "provider", "intelligence", "url", cfg.Intelligence.BaseURL)
+		return categoryindex.NewIntelligenceClient(categoryindex.IntelligenceConfig{
+			BaseURL: cfg.Intelligence.BaseURL,
+			Timeout: cfg.Timeouts.HTTPClient,
+		})
+	}
+	logger.Info(ctx, "using_category_index_provider", "provider", "mock")
+	return mocks.NewMockCategoryIndexProvider()
 }
 
 func createFilesystemProvider(ctx context.Context, cfg *config.Config, logger *logging.Logger) providers.FilesystemProvider {

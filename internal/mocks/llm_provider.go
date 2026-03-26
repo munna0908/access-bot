@@ -41,30 +41,38 @@ func (m *MockLLMProvider) Complete(ctx context.Context, systemPrompt, userPrompt
 	// Generate contextual mock responses based on prompt content
 	promptLower := strings.ToLower(userPrompt)
 
+	// Food ordering → numbered list (matches what the telegram bot parses)
+	if strings.Contains(promptLower, "list exactly 3") || strings.Contains(promptLower, "numbered list") ||
+		(strings.Contains(promptLower, "order food") || strings.Contains(promptLower, "suggest") && strings.Contains(promptLower, "food")) {
+		return "1. Masala Dosa\n2. Pad Thai (no egg, no peanuts)\n3. Vegetable Biryani", nil
+	}
+
 	if strings.Contains(promptLower, "dinner") || strings.Contains(promptLower, "food") || strings.Contains(promptLower, "order") {
-		if strings.Contains(userPrompt, "FOOD") && strings.Contains(userPrompt, "HEALTH") {
-			return "A vegetarian South Indian dinner would suit your preferences tonight. Avoid dairy-based dishes given your lactose intolerance.", nil
-		}
 		if strings.Contains(userPrompt, "FOOD") {
-			return "Based on your preferences, I'd recommend a vegetarian South Indian restaurant. Masala Dosa would be a great choice.", nil
+			return "1. Masala Dosa\n2. Pad Thai (no egg, no peanuts)\n3. Vegetable Biryani", nil
 		}
+	}
+
+	// Delivery address query
+	if strings.Contains(promptLower, "delivery address") || strings.Contains(promptLower, "my address") {
+		return "123 Palm Grove Apartments, Flat 4B, Tower 2, Koramangala, Bangalore – 560034. Delivery between 10 AM – 8 PM. Gate code: 1234.", nil
 	}
 
 	if strings.Contains(promptLower, "address") || strings.Contains(promptLower, "delivery") {
 		if strings.Contains(userPrompt, "ADDRESS") {
-			return "Your delivery address is 123 Main Street, Apartment 4B, San Francisco, CA 94102. Gate code is 1234.", nil
+			return "123 Palm Grove Apartments, Flat 4B, Tower 2, Koramangala, Bangalore – 560034. Gate code: 1234.", nil
 		}
 	}
 
 	if strings.Contains(promptLower, "health") || strings.Contains(promptLower, "medical") {
 		if strings.Contains(userPrompt, "HEALTH") {
-			return "Based on your health profile, you should avoid high sodium foods and high glycemic index items due to your Type 2 Diabetes and mild hypertension.", nil
+			return "Based on your health profile, avoid high sodium and high glycemic index foods due to Type 2 Diabetes and mild hypertension. Also avoid peanuts and dairy.", nil
 		}
 	}
 
 	if strings.Contains(promptLower, "payment") || strings.Contains(promptLower, "pay") || strings.Contains(promptLower, "budget") {
 		if strings.Contains(userPrompt, "PAYMENT") {
-			return "Your preferred payment method is Apple Pay with a typical meal budget of $15-25.", nil
+			return "Preferred payment: Apple Pay (default). Typical meal budget: Rs 300-500.", nil
 		}
 	}
 
