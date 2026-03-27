@@ -26,7 +26,8 @@ When the question asks to order food or list food options, respond with ONLY a n
 3. [Dish Name]
 
 IMPORTANT — Delivery address requests:
-When the question asks for a delivery address, respond with the full address and delivery instructions as a single concise paragraph. No extra commentary.`
+The question will tell you exactly which address type to return (e.g. "my work address", "my home address", "my gym address").
+Find that address in the context and respond with ONLY the full postal address on a single line: building/company name, flat/floor, street, area, city, state and PIN code. No gate codes, no delivery notes, no explanation.`
 
 // CategoryContent holds the category name and its markdown content.
 type CategoryContent struct {
