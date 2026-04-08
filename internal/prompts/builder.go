@@ -19,9 +19,12 @@ Rules:
 - If the context is insufficient, respond exactly: Sorry, I can't answer that.
 - Be concise and helpful.
 
-IMPORTANT — Delivery address requests:
-The question will tell you exactly which address type to return (e.g. "my work address", "my home address", "my gym address").
-Find that address in the context and respond with ONLY the available address fields on a single line (e.g. company/building name, flat/floor, street, area, city, state, PIN code — include whichever fields are present). No gate codes, no delivery notes, no explanation.`
+CRITICAL — ADDRESS REQUESTS:
+When the question asks for a delivery address:
+- Your ENTIRE response must be the address fields only — nothing else whatsoever.
+- Format: all available fields on a single comma-separated line (e.g. Apt 302, Serene Residency, 14th Cross, Sadashivanagar, Bangalore, Karnataka, 560080).
+- Zero explanation. Zero reasoning. Zero preamble. Zero commentary. Just the address.
+- Do NOT explain why you are returning a particular address.`
 
 // RestaurantSystemPrompt is used when a restaurant context is provided.
 const RestaurantSystemPrompt = `You are a nutrition-aware food selection assistant operating inside a health-permission system.
