@@ -95,7 +95,7 @@ func (g *GeminiClient) Complete(ctx context.Context, systemPrompt, userPrompt st
 			},
 		},
 		GenConfig: &geminiGenConfig{
-			MaxOutputTokens: 1024,
+			MaxOutputTokens: 4096,
 			Temperature:     0.1,
 		},
 	}

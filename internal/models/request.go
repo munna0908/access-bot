@@ -11,4 +11,8 @@ type AnswerRequest struct {
 	Channel            string            `json:"channel"`
 	Timestamp          int64             `json:"timestamp"`
 	Metadata           map[string]string `json:"metadata,omitempty"`
+	// RestaurantContext contains the selected restaurant's full menu as a JSON string.
+	// When present, the LLM picks 3 dishes from this restaurant based on the participant's
+	// food preferences and health restrictions, and returns structured JSON.
+	RestaurantContext  string            `json:"restaurant_context,omitempty"`
 }

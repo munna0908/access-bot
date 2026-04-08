@@ -102,9 +102,15 @@ func (s *Service) ProcessAnswerRequest(ctx context.Context, req *models.AnswerRe
 		return s.failureResponse(ctx, reqLogger, req.RequestID, string(domain.StatusCannotAnswer), string(domain.ReasonInsufficientAuthorizedContext))
 	}
 
-	// Step 9: Build prompt
-	userPrompt := prompts.BuildUserPrompt(req.Question, categoryContents)
-	systemPrompt := prompts.GetSystemPrompt()
+	// Step 9: Build prompt — use restaurant-aware prompt when context is provided
+	var userPrompt, systemPrompt string
+	if req.RestaurantContext != "" {
+		userPrompt = prompts.BuildRestaurantUserPrompt(req.Question, req.RestaurantContext, categoryContents)
+		systemPrompt = prompts.GetRestaurantSystemPrompt()
+	} else {
+		userPrompt = prompts.BuildUserPrompt(req.Question, categoryContents)
+		systemPrompt = prompts.GetSystemPrompt()
+	}
 
 	reqLogger.Debug(ctx, "prompt_built", "categories_count", len(categoryContents))
 

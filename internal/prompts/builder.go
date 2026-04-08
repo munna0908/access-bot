@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// SystemPrompt is the system instruction for the LLM.
+// SystemPrompt is the system instruction for generic (non-restaurant) requests.
 const SystemPrompt = `You are answering a question inside a permission-controlled participant context system.
 
 You will receive:
@@ -19,15 +19,39 @@ Rules:
 - If the context is insufficient, respond exactly: Sorry, I can't answer that.
 - Be concise and helpful.
 
-IMPORTANT — Food ordering requests:
-When the question asks to order food or list food options, respond with ONLY a numbered list of exactly 3 suitable dishes based on the participant's food preferences and health restrictions. Use this exact format with no other text:
-1. [Dish Name]
-2. [Dish Name]
-3. [Dish Name]
-
 IMPORTANT — Delivery address requests:
 The question will tell you exactly which address type to return (e.g. "my work address", "my home address", "my gym address").
-Find that address in the context and respond with ONLY the full postal address on a single line: building/company name, flat/floor, street, area, city, state and PIN code. No gate codes, no delivery notes, no explanation.`
+Find that address in the context and respond with ONLY the available address fields on a single line (e.g. company/building name, flat/floor, street, area, city, state, PIN code — include whichever fields are present). No gate codes, no delivery notes, no explanation.`
+
+// RestaurantSystemPrompt is used when a restaurant context is provided.
+const RestaurantSystemPrompt = `You are a nutrition-aware food selection assistant operating inside a health-permission system.
+
+You will receive:
+1. The user's original food request
+2. A restaurant with its full menu (name, description, calories, protein, carbs, fat, allergens)
+3. The participant's health profile and food preferences (may be partial or empty)
+
+STEP 1 — HEALTH CONFLICT CHECK:
+If the user explicitly requested a specific dish AND that dish directly conflicts with the participant's health profile (allergen, dietary restriction, or medical condition explicitly listed), return ONLY:
+{"health_conflict":true,"message":"Found [dish] at [restaurant], but your health profile advises against it — [specific reason from profile]. Want to try something else? You can say 'order [mealtime]' to browse available options."}
+
+STEP 2 — DISH SELECTION (if no health conflict):
+- Pick exactly 3 dishes from the menu.
+- Prioritise dishes that match the user's request.
+- Prefer dishes matching the participant's food preferences.
+- Avoid dishes containing allergens the participant is allergic to.
+- Respect dietary restrictions (vegetarian, vegan, low-carb, gluten-free, etc.) if stated.
+- If the profile is missing or sparse, pick the 3 best or most popular dishes.
+- ALWAYS return exactly 3 dishes — never fewer, never more.
+
+CRITICAL OUTPUT RULES:
+- Return ONLY a single valid JSON object — no markdown fences, no explanation.
+
+Normal response:
+{"restaurant_name":"Restaurant Name","cuisine":"Cuisine Type","delivery_mins":25,"dishes":[{"name":"Dish Name","calories":380,"protein":"28g","carbs":"18g","fat":"20g","allergens":"Dairy, Gluten"},{"name":"Dish Name","calories":320,"protein":"22g","carbs":"30g","fat":"12g","allergens":"None"},{"name":"Dish Name","calories":450,"protein":"35g","carbs":"25g","fat":"18g","allergens":"Gluten"}]}
+
+Health conflict response:
+{"health_conflict":true,"message":"..."}`
 
 // CategoryContent holds the category name and its markdown content.
 type CategoryContent struct {
@@ -35,7 +59,7 @@ type CategoryContent struct {
 	Content  string
 }
 
-// BuildUserPrompt constructs the user prompt with the question and context.
+// BuildUserPrompt constructs the user prompt for generic requests.
 func BuildUserPrompt(question string, categoryContents []CategoryContent) string {
 	var sb strings.Builder
 
@@ -56,7 +80,34 @@ func BuildUserPrompt(question string, categoryContents []CategoryContent) string
 	return sb.String()
 }
 
-// GetSystemPrompt returns the system prompt for the LLM.
+// BuildRestaurantUserPrompt constructs the prompt when a restaurant context is provided.
+// The LLM performs a health conflict check then picks 3 suitable dishes.
+func BuildRestaurantUserPrompt(userRequest, restaurantContext string, categoryContents []CategoryContent) string {
+	var sb strings.Builder
+
+	sb.WriteString("User's request: ")
+	sb.WriteString(userRequest)
+	sb.WriteString("\n\nSelected restaurant (full menu):\n")
+	sb.WriteString(restaurantContext)
+	sb.WriteString("\n\nParticipant profile:\n")
+
+	for _, cc := range categoryContents {
+		sb.WriteString(fmt.Sprintf("\n## %s\n", cc.Category))
+		sb.WriteString(cc.Content)
+		sb.WriteString("\n")
+	}
+
+	sb.WriteString("\nApply the health conflict check, then return JSON as specified.")
+
+	return sb.String()
+}
+
+// GetSystemPrompt returns the system prompt for generic requests.
 func GetSystemPrompt() string {
 	return SystemPrompt
+}
+
+// GetRestaurantSystemPrompt returns the system prompt for restaurant-aware requests.
+func GetRestaurantSystemPrompt() string {
+	return RestaurantSystemPrompt
 }

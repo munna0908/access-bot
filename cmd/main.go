@@ -45,10 +45,10 @@ func main() {
 	var llmProvider providers.LLMProvider
 
 	if cfg.DemoMode {
-		logger.Info(ctx, "demo_mode_enabled", "note", "accepting any session/participant")
+		logger.Info(ctx, "demo_mode_enabled", "note", "accepting any session/participant with inline sample data")
 		sessionProvider = mocks.NewDemoSessionProvider()
-		categoryIndexProvider = createCategoryIndexProvider(ctx, cfg, logger)
-		filesystemProvider = createFilesystemProvider(ctx, cfg, logger)
+		categoryIndexProvider = mocks.NewDemoCategoryIndexProvider()
+		filesystemProvider = mocks.NewDemoFilesystemProvider()
 		llmProvider = createLLMProvider(ctx, cfg, logger)
 	} else {
 		sessionProvider = createSessionProvider(ctx, cfg, logger)
