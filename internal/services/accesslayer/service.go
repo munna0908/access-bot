@@ -123,6 +123,13 @@ func (s *Service) ProcessAnswerRequest(ctx context.Context, req *models.AnswerRe
 
 	// Step 11: Check for empty response
 	answer = strings.TrimSpace(answer)
+
+	// For restaurant requests the response must be JSON — extract it in case
+	// the LLM prepended reasoning or explanation before the JSON object.
+	if req.RestaurantContext != "" {
+		answer = extractLastJSONObject(answer)
+	}
+
 	if answer == "" {
 		reqLogger.Error(ctx, "empty_llm_response")
 		return s.failureResponse(ctx, reqLogger, req.RequestID, string(domain.StatusCannotAnswer), string(domain.ReasonEmptyResponse))
@@ -211,6 +218,21 @@ func (s *Service) fetchCategoryContents(
 	}
 
 	return contents, fetchedCategories, nil
+}
+
+// extractLastJSONObject extracts the last JSON object from s.
+// Some LLMs prepend reasoning text before the JSON — this strips it out.
+// If the response is already pure JSON it is returned unchanged.
+func extractLastJSONObject(s string) string {
+	s = strings.TrimSpace(s)
+	if strings.HasPrefix(s, "{") {
+		return s
+	}
+	// Find the last line that begins with '{' (JSON always starts on its own line)
+	if idx := strings.LastIndex(s, "\n{"); idx != -1 {
+		return strings.TrimSpace(s[idx:])
+	}
+	return s
 }
 
 // failureResponse creates a failure response and logs the result.

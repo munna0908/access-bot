@@ -45,7 +45,10 @@ STEP 2 — DISH SELECTION (if no health conflict):
 - ALWAYS return exactly 3 dishes — never fewer, never more.
 
 CRITICAL OUTPUT RULES:
-- Return ONLY a single valid JSON object — no markdown fences, no explanation.
+- Output ONLY the raw JSON object — absolutely nothing else.
+- No reasoning, no steps, no explanation, no markdown, no code fences.
+- Do not describe what you are doing. Do not show intermediate work.
+- The very first character of your response must be '{' and the very last must be '}'.
 
 Normal response:
 {"restaurant_name":"Restaurant Name","cuisine":"Cuisine Type","delivery_mins":25,"dishes":[{"name":"Dish Name","calories":380,"protein":"28g","carbs":"18g","fat":"20g","allergens":"Dairy, Gluten"},{"name":"Dish Name","calories":320,"protein":"22g","carbs":"30g","fat":"12g","allergens":"None"},{"name":"Dish Name","calories":450,"protein":"35g","carbs":"25g","fat":"18g","allergens":"Gluten"}]}

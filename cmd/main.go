@@ -132,8 +132,16 @@ func createLLMProvider(ctx context.Context, cfg *config.Config, logger *logging.
 
 	switch provider {
 	case "claude":
+		claude := llm.NewClaudeClient(cfg.Claude.APIKey, cfg.Claude.Model, cfg.Timeouts.HTTPClient)
+		// If Gemini key is also present, chain Claude→Gemini as fallback
+		if cfg.Gemini.APIKey != "" {
+			gemini := llm.NewGeminiClient(cfg.Gemini.APIKey, cfg.Gemini.Model, cfg.Timeouts.HTTPClient)
+			logger.Info(ctx, "using_llm_provider", "provider", "claude+gemini_fallback",
+				"primary", cfg.Claude.Model, "fallback", cfg.Gemini.Model)
+			return llm.NewFallbackLLMProvider(claude, gemini)
+		}
 		logger.Info(ctx, "using_llm_provider", "provider", "claude", "model", cfg.Claude.Model)
-		return llm.NewClaudeClient(cfg.Claude.APIKey, cfg.Claude.Model, cfg.Timeouts.HTTPClient)
+		return claude
 	case "gemini":
 		logger.Info(ctx, "using_llm_provider", "provider", "gemini", "model", cfg.Gemini.Model)
 		return llm.NewGeminiClient(cfg.Gemini.APIKey, cfg.Gemini.Model, cfg.Timeouts.HTTPClient)

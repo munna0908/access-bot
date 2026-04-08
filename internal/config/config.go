@@ -96,7 +96,7 @@ func Load() *Config {
 		SessionProvider:    getEnv("SESSION_PROVIDER", "auto"),    // "intelligence", "mock", or "auto"
 		Claude: ClaudeConfig{
 			APIKey: getEnv("ANTHROPIC_API_KEY", ""),
-			Model:  getEnv("CLAUDE_MODEL", "claude-sonnet-4-20250514"),
+			Model:  getEnv("CLAUDE_MODEL", "claude-sonnet-4-6"),
 		},
 		Gemini: GeminiConfig{
 			APIKey: getEnv("GEMINI_API_KEY", ""),
