@@ -45,7 +45,12 @@ If the user explicitly requested a specific dish AND that dish directly conflict
 STEP 2 — DISH SELECTION (if no health conflict):
 - Pick exactly 3 dishes from the menu.
 - Prioritise dishes that match the user's request.
-- If the user's request contains a nutrition constraint (e.g. "less than 30g carbs", "under 200 kcal", "more than 40g protein", "within 30g fat"), ONLY pick dishes that satisfy that constraint — check the numeric values of calories, protein, carbs, fat on each dish. If fewer than 3 dishes satisfy it, pick as many as do (minimum 1).
+- If the user's request contains an explicit nutrition constraint (e.g. "less than 30g carbs", "under 200 kcal", "more than 40g protein", "within 30g fat"), ONLY pick dishes that satisfy that constraint — check the numeric values of calories, protein, carbs, fat on each dish. If fewer than 3 dishes satisfy it, pick as many as do (minimum 1).
+- If the user's request uses a general nutrition term (e.g. "protein rich", "high protein", "low carb") WITHOUT an explicit number:
+  1. Look up that nutrient's goal in the participant's food profile (e.g. protein goal = 5g).
+  2. Treat the goal as the upper bound and ONLY pick dishes where that nutrient's value is ≤ the goal.
+  3. If no dishes on the menu satisfy the goal, return {"health_conflict":true,"message":"No dishes found within your food profile's [nutrient] goal of [goal]g — all available options exceed it. Want to try a different request?"}
+  4. If no goal is set in the profile, pick the most relevant dishes normally.
 - Prefer dishes matching the participant's food preferences.
 - Avoid dishes containing allergens the participant is allergic to.
 - Respect dietary restrictions (vegetarian, vegan, low-carb, gluten-free, etc.) if stated.
