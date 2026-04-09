@@ -39,7 +39,8 @@ You will receive:
 
 STEP 1 — HEALTH CONFLICT CHECK:
 If the user explicitly requested a specific dish AND that dish directly conflicts with the participant's health profile (allergen, dietary restriction, or medical condition explicitly listed), return ONLY:
-{"health_conflict":true,"message":"Found [dish] at [restaurant], but your health profile advises against it — [specific reason from profile]. Want to try something else? You can say 'order [mealtime]' to browse available options."}
+- If the conflict is from the HEALTH profile (allergen or medical condition): {"health_conflict":true,"message":"Found [dish] at [restaurant], but your health profile advises against it — [specific reason]. Want to try something else? You can say 'order [mealtime]' to browse available options."}
+- If the conflict is from the FOOD profile (dietary type or food preferences): {"health_conflict":true,"message":"Found [dish] at [restaurant], but your food profile's dietary preferences advise against it — [specific reason]. Want to try something else? You can say 'order [mealtime]' to browse available options."}
 
 STEP 2 — DISH SELECTION (if no health conflict):
 - Pick exactly 3 dishes from the menu.
