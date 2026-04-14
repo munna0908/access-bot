@@ -57,7 +57,7 @@ func NewMockSessionProvider() *MockSessionProvider {
 			"preferences.food.read",
 			"health.read",
 			"profile.address.read",
-			"finance.payment.read",
+			"schedule.read",
 		},
 		ExpiresAt:     2000000000, // Far future timestamp (year 2033)
 		RemainingUses: 10,
@@ -70,7 +70,7 @@ func NewMockSessionProvider() *MockSessionProvider {
 		ApprovedScopes: []string{
 			"preferences.food.read",
 			"profile.address.read",
-			"finance.payment.read",
+			"schedule.read",
 		},
 		ExpiresAt:     2000000000, // Far future timestamp (year 2033)
 		RemainingUses: 10,

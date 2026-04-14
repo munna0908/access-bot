@@ -36,10 +36,10 @@ func (d *DemoCategoryIndexProvider) GetCategoryIndex(_ context.Context, particip
 	return &models.CategoryIndex{
 		ParticipantID: participantID,
 		Categories: map[string]string{
-			"FOOD":    "demo_food_cid",
-			"HEALTH":  "demo_health_cid",
-			"ADDRESS": "demo_address_cid",
-			"PAYMENT": "demo_payment_cid",
+			"FOOD":     "demo_food_cid",
+			"HEALTH":   "demo_health_cid",
+			"ADDRESS":  "demo_address_cid",
+			"SCHEDULE": "demo_schedule_cid",
 		},
 	}, nil
 }
@@ -57,10 +57,10 @@ var _ providers.FilesystemProvider = (*DemoFilesystemProvider)(nil)
 func NewDemoFilesystemProvider() *DemoFilesystemProvider {
 	return &DemoFilesystemProvider{
 		files: map[string]*models.FileContent{
-			"demo_food_cid":    {CID: "demo_food_cid", ContentType: "text/markdown", Content: demoFoodContent},
-			"demo_health_cid":  {CID: "demo_health_cid", ContentType: "text/markdown", Content: demoHealthContent},
-			"demo_address_cid": {CID: "demo_address_cid", ContentType: "text/markdown", Content: demoAddressContent},
-			"demo_payment_cid": {CID: "demo_payment_cid", ContentType: "text/markdown", Content: demoPaymentContent},
+			"demo_food_cid":     {CID: "demo_food_cid", ContentType: "text/markdown", Content: demoFoodContent},
+			"demo_health_cid":   {CID: "demo_health_cid", ContentType: "text/markdown", Content: demoHealthContent},
+			"demo_address_cid":  {CID: "demo_address_cid", ContentType: "text/markdown", Content: demoAddressContent},
+			"demo_schedule_cid": {CID: "demo_schedule_cid", ContentType: "text/markdown", Content: demoScheduleContent},
 		},
 	}
 }
@@ -216,26 +216,24 @@ const demoAddressContent = `# Address Information
 - **PIN Code:** 560066
 - **Delivery Hours:** 10 AM - 6 PM (weekdays only)`
 
-const demoPaymentContent = `# Payment Information
+const demoScheduleContent = `# Schedule
 
-## Preferred Payment Methods
-1. Apple Pay (default)
-2. Google Pay
-3. Credit Card
+## Today's Events
+- 10:00 AM: Daily standup
+- 1:00 PM: Lunch break
+- 3:00 PM: Product review
 
-## UPI IDs
-- rahul@okicici (primary)
-- rahul.sharma@paytm
+## Working Hours
+- Monday–Friday: 9 AM – 6 PM
 
-## Budget Preferences
-| Category | Typical Budget |
-|----------|----------------|
-| Meals | Rs 300-500 |
-| Groceries | Rs 2000-3000/week |
+## Recurring Events
+| Day | Time | Event |
+|-----|------|-------|
+| Monday | 9:30 AM | Sprint planning |
+| Friday | 5:00 PM | Team retrospective |
 
-## Subscription Services
-- Swiggy One (active)
+## Out of Office
+- None scheduled
 
-## Spending Limits
-- Daily limit: Rs 5000
-- Single transaction alert: Above Rs 2000`
+## Availability
+- Free slots today: 11 AM – 1 PM, 4 PM – 6 PM`

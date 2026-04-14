@@ -27,30 +27,30 @@ func NewMockCategoryIndexProvider() *MockCategoryIndexProvider {
 	provider.indexes["user_001"] = &models.CategoryIndex{
 		ParticipantID: "user_001",
 		Categories: map[string]string{
-			"HEALTH":  "bafy_health_cid_001",
-			"FOOD":    "bafy_food_cid_001",
-			"ADDRESS": "bafy_address_cid_001",
-			"PAYMENT": "bafy_payment_cid_001",
+			"HEALTH":   "bafy_health_cid_001",
+			"FOOD":     "bafy_food_cid_001",
+			"ADDRESS":  "bafy_address_cid_001",
+			"SCHEDULE": "bafy_schedule_cid_001",
 		},
 	}
 
 	provider.indexes["user_002"] = &models.CategoryIndex{
 		ParticipantID: "user_002",
 		Categories: map[string]string{
-			"HEALTH":  "bafy_health_cid_002",
-			"FOOD":    "bafy_food_cid_002",
-			"ADDRESS": "bafy_address_cid_002",
-			"PAYMENT": "bafy_payment_cid_002",
+			"HEALTH":   "bafy_health_cid_002",
+			"FOOD":     "bafy_food_cid_002",
+			"ADDRESS":  "bafy_address_cid_002",
+			"SCHEDULE": "bafy_schedule_cid_002",
 		},
 	}
 
 	provider.indexes["user_004"] = &models.CategoryIndex{
 		ParticipantID: "user_002",
 		Categories: map[string]string{
-			"HEALTH":  "bafy_health_cid_002",
-			"FOOD":    "bafy_food_cid_002",
-			"ADDRESS": "bafy_address_cid_002",
-			"PAYMENT": "bafy_payment_cid_002",
+			"HEALTH":   "bafy_health_cid_002",
+			"FOOD":     "bafy_food_cid_002",
+			"ADDRESS":  "bafy_address_cid_002",
+			"SCHEDULE": "bafy_schedule_cid_002",
 		},
 	}
 

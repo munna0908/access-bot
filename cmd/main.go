@@ -183,13 +183,13 @@ func createCategoryIndexProvider(ctx context.Context, cfg *config.Config, logger
 			"food", cfg.CategoryCIDs.Food != "",
 			"health", cfg.CategoryCIDs.Health != "",
 			"address", cfg.CategoryCIDs.Address != "",
-			"payment", cfg.CategoryCIDs.Payment != "",
+			"schedule", cfg.CategoryCIDs.Schedule != "",
 		)
 		return mocks.NewCIDCategoryIndexProvider(
 			cfg.CategoryCIDs.Food,
 			cfg.CategoryCIDs.Health,
 			cfg.CategoryCIDs.Address,
-			cfg.CategoryCIDs.Payment,
+			cfg.CategoryCIDs.Schedule,
 		)
 	}
 	// Fall back to on-chain lookup via intelligence service

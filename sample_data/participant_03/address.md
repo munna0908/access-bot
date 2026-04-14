@@ -12,7 +12,6 @@
 
 ## Delivery Instructions
 - Call on arrival — gate is locked after 9 PM
-- Prefer delivery between 9 AM - 9 PM
 - Leave with guard if out; will collect on return
 
 ## Contact for Delivery

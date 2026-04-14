@@ -203,8 +203,8 @@ func TestValidateCategories(t *testing.T) {
 	}{
 		{
 			name:       "all valid categories",
-			categories: []string{"HEALTH", "FOOD", "ADDRESS", "PAYMENT"},
-			wantValid:  []string{"HEALTH", "FOOD", "ADDRESS", "PAYMENT"},
+			categories: []string{"HEALTH", "FOOD", "ADDRESS", "SCHEDULE"},
+			wantValid:  []string{"HEALTH", "FOOD", "ADDRESS", "SCHEDULE"},
 			wantError:  false,
 		},
 		{

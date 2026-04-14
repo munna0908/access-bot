@@ -87,7 +87,7 @@ The service supports four data categories, each requiring a specific scope:
 | HEALTH | health.read |
 | FOOD | preferences.food.read |
 | ADDRESS | profile.address.read |
-| PAYMENT | finance.payment.read |
+| SCHEDULE | schedule.read |
 
 A session must have all required scopes to access the requested categories.
 
@@ -244,7 +244,7 @@ For local development, the service uses in-memory mocks when real providers aren
 - HEALTH: bafy_health_cid_001
 - FOOD: bafy_food_cid_001
 - ADDRESS: bafy_address_cid_001
-- PAYMENT: bafy_payment_cid_001
+- SCHEDULE: bafy_schedule_cid_001
 
 ### Test Sessions
 

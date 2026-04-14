@@ -14,7 +14,7 @@ func TestGetRequiredScope(t *testing.T) {
 		{"HEALTH", "health.read", true},
 		{"FOOD", "preferences.food.read", true},
 		{"ADDRESS", "profile.address.read", true},
-		{"PAYMENT", "finance.payment.read", true},
+		{"SCHEDULE", "schedule.read", true},
 		{"INVALID", "", false},
 		{"", "", false},
 	}
@@ -39,10 +39,10 @@ func TestGetAllValidCategories(t *testing.T) {
 	}
 
 	expected := map[string]bool{
-		"HEALTH":  true,
-		"FOOD":    true,
-		"ADDRESS": true,
-		"PAYMENT": true,
+		"HEALTH":   true,
+		"FOOD":     true,
+		"ADDRESS":  true,
+		"SCHEDULE": true,
 	}
 
 	for _, cat := range categories {

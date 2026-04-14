@@ -13,7 +13,6 @@
 ## Delivery Instructions
 - Gate code: 1234
 - Security will call before allowing entry
-- Prefer delivery between 6 PM - 10 AM
 - Leave at door if not available (for trusted deliveries)
 
 ## Contact for Delivery
@@ -25,7 +24,6 @@
 - **Address:** 456 Tech Park, Whitefield
 - **City:** Bangalore
 - **PIN Code:** 560066
-- **Delivery Hours:** 10 AM - 6 PM (weekdays only)
 
 ## Saved Locations
 | Label | Address |

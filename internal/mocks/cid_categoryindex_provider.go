@@ -18,7 +18,7 @@ var _ providers.CategoryIndexProvider = (*CIDCategoryIndexProvider)(nil)
 
 // NewCIDCategoryIndexProvider creates a provider that returns the given CIDs
 // for all participants.
-func NewCIDCategoryIndexProvider(food, health, address, payment string) *CIDCategoryIndexProvider {
+func NewCIDCategoryIndexProvider(food, health, address, schedule string) *CIDCategoryIndexProvider {
 	cids := map[string]string{}
 	if food != "" {
 		cids["FOOD"] = food
@@ -29,8 +29,8 @@ func NewCIDCategoryIndexProvider(food, health, address, payment string) *CIDCate
 	if address != "" {
 		cids["ADDRESS"] = address
 	}
-	if payment != "" {
-		cids["PAYMENT"] = payment
+	if schedule != "" {
+		cids["SCHEDULE"] = schedule
 	}
 	return &CIDCategoryIndexProvider{cids: cids}
 }

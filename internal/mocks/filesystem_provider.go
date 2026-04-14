@@ -98,21 +98,21 @@ USA
 - Weekends: 12 PM - 9 PM`,
 	}
 
-	provider.files["bafy_payment_cid_001"] = &models.FileContent{
-		CID:         "bafy_payment_cid_001",
+	provider.files["bafy_schedule_cid_001"] = &models.FileContent{
+		CID:         "bafy_schedule_cid_001",
 		ContentType: "text/markdown",
-		Content: `# Payment Preferences
+		Content: `# Schedule
 
-## Preferred Payment Method
-- Digital wallet (Apple Pay)
+## Today's Events
+- 10:00 AM: Daily standup
+- 3:00 PM: Product review
 
-## Budget Guidelines
-- Typical meal budget: $15-25
-- Special occasion budget: up to $50
+## Working Hours
+- Monday–Friday: 9 AM – 6 PM
+- Lunch break: 1 PM – 2 PM
 
-## Tipping Preferences
-- Default tip: 20%
-- Excellent service: 25%`,
+## Blocked Times
+- Every Friday 5 PM: Team retrospective`,
 	}
 
 	// Add sample file contents for user_002
@@ -175,16 +175,20 @@ USA
 - Front desk will accept packages`,
 	}
 
-	provider.files["bafy_payment_cid_002"] = &models.FileContent{
-		CID:         "bafy_payment_cid_002",
+	provider.files["bafy_schedule_cid_002"] = &models.FileContent{
+		CID:         "bafy_schedule_cid_002",
 		ContentType: "text/markdown",
-		Content: `# Payment Preferences
+		Content: `# Schedule
 
-## Preferred Payment Method
-- Credit card
+## Today's Events
+- 9:30 AM: Sprint planning
+- 2:00 PM: Design review
 
-## Budget Guidelines
-- Typical meal budget: $20-35`,
+## Working Hours
+- Monday–Friday: 10 AM – 7 PM
+
+## Blocked Times
+- Every Monday 9:30 AM: Sprint planning`,
 	}
 
 	// Partial user data

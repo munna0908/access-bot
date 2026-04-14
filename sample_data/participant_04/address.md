@@ -12,7 +12,6 @@
 
 ## Delivery Instructions
 - Knock loudly — doorbell is broken
-- Prefer delivery between 10 AM - 10 PM
 - Do not leave at door — building has no security
 
 ## Contact for Delivery
@@ -23,7 +22,6 @@
 - **Address:** TCS Gitanjali Park, Newtown
 - **City:** Kolkata
 - **PIN Code:** 700156
-- **Delivery Hours:** 10 AM - 5 PM (weekdays only)
 
 ## Saved Locations
 | Label | Address |

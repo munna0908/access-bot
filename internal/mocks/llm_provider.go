@@ -70,9 +70,9 @@ func (m *MockLLMProvider) Complete(ctx context.Context, systemPrompt, userPrompt
 		}
 	}
 
-	if strings.Contains(promptLower, "payment") || strings.Contains(promptLower, "pay") || strings.Contains(promptLower, "budget") {
-		if strings.Contains(userPrompt, "PAYMENT") {
-			return "Preferred payment: Apple Pay (default). Typical meal budget: Rs 300-500.", nil
+	if strings.Contains(promptLower, "schedule") || strings.Contains(promptLower, "meeting") || strings.Contains(promptLower, "calendar") {
+		if strings.Contains(userPrompt, "SCHEDULE") {
+			return "You have a standup at 10 AM and a product review at 3 PM today.", nil
 		}
 	}
 

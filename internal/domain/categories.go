@@ -7,15 +7,15 @@ const (
 	CategoryHealth  Category = "HEALTH"
 	CategoryFood    Category = "FOOD"
 	CategoryAddress Category = "ADDRESS"
-	CategoryPayment Category = "PAYMENT"
+	CategorySchedule Category = "SCHEDULE"
 )
 
 // ValidCategories is the set of all valid categories for v1.
 var ValidCategories = map[Category]bool{
-	CategoryHealth:  true,
-	CategoryFood:    true,
-	CategoryAddress: true,
-	CategoryPayment: true,
+	CategoryHealth:   true,
+	CategoryFood:     true,
+	CategoryAddress:  true,
+	CategorySchedule: true,
 }
 
 // IsValidCategory checks if a category string is supported.

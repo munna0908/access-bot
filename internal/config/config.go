@@ -57,15 +57,15 @@ type IntelligenceConfig struct {
 // Used in demo/non-chain mode so the bot can fetch real files without
 // requiring on-chain SetCategoryRef registration.
 type CategoryCIDsConfig struct {
-	Food    string
-	Health  string
-	Address string
-	Payment string
+	Food     string
+	Health   string
+	Address  string
+	Schedule string
 }
 
 // IsConfigured returns true if at least one CID is set.
 func (c CategoryCIDsConfig) IsConfigured() bool {
-	return c.Food != "" || c.Health != "" || c.Address != "" || c.Payment != ""
+	return c.Food != "" || c.Health != "" || c.Address != "" || c.Schedule != ""
 }
 
 // TimeoutConfig holds various timeout configurations.
@@ -80,7 +80,7 @@ var CategoryScopeMapping = map[string]string{
 	"HEALTH":  "health.read",
 	"FOOD":    "preferences.food.read",
 	"ADDRESS": "profile.address.read",
-	"PAYMENT": "finance.payment.read",
+	"SCHEDULE": "schedule.read",
 }
 
 // Load reads configuration from environment variables.
@@ -115,7 +115,7 @@ func Load() *Config {
 			Food:    getEnv("CATEGORY_CID_FOOD", ""),
 			Health:  getEnv("CATEGORY_CID_HEALTH", ""),
 			Address: getEnv("CATEGORY_CID_ADDRESS", ""),
-			Payment: getEnv("CATEGORY_CID_PAYMENT", ""),
+			Schedule: getEnv("CATEGORY_CID_SCHEDULE", ""),
 		},
 		Timeouts: TimeoutConfig{
 			HTTPClient:  getDurationEnv("HTTP_CLIENT_TIMEOUT", 30),
